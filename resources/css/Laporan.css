@@ -1,0 +1,241 @@
+/* resources/css/laporan.css */
+
+/* --- GLOBAL LAYOUT --- */
+.laporan-wrapper {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f3f4f6;
+    min-height: 100vh;
+    padding-bottom: 80px; /* Ruang lebih di bawah untuk HP */
+}
+
+.container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+/* --- CARD STYLE --- */
+.report-card {
+    background: white;
+    border-radius: 16px;
+    padding: 2rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    width: 100%;
+}
+
+/* --- HEADER SECTION --- */
+.report-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end; /* Align bottom supaya rapi */
+    margin-bottom: 2rem;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.report-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1f2937;
+    margin-bottom: 0.25rem;
+    line-height: 1.2;
+}
+
+.report-subtitle {
+    color: #6b7280;
+    font-size: 0.875rem;
+}
+
+/* --- ACTIONS (Filter & Buttons) --- */
+.actions-container {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+}
+
+.filter-select {
+    padding: 0.6rem 1rem;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    background: white;
+    cursor: pointer;
+    font-size: 0.875rem;
+    min-width: 150px;
+}
+
+.filter-select:focus {
+    outline: 2px solid #16a34a;
+    border-color: transparent;
+}
+
+.btn-action {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.6rem 1.2rem;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: transform 0.1s, box-shadow 0.2s;
+    color: white;
+    white-space: nowrap; /* Teks jangan turun baris */
+}
+
+.btn-action:active { transform: scale(0.98); }
+
+.btn-csv { background: #3b82f6; }
+.btn-csv:hover { background: #2563eb; }
+
+.btn-pdf { background: #16a34a; }
+.btn-pdf:hover { background: #15803d; }
+
+.btn-action:disabled {
+    background: #9ca3af;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* --- STATISTICS GRID --- */
+.stats-grid {
+    display: grid;
+    /* Responsive Grid: Minimal 200px lebar, kalau muat nambah kolom */
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.stat-card {
+    background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+    padding: 1.25rem;
+    border-radius: 12px;
+    border: 1px solid #bbf7d0;
+    transition: transform 0.2s;
+}
+
+.stat-card:hover { transform: translateY(-2px); }
+
+.stat-label {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #166534;
+    margin-bottom: 0.25rem;
+}
+
+.stat-value {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #14532d;
+}
+
+/* --- TABLE SECTION (Bagian Paling Kritis di HP) --- */
+.table-container {
+    width: 100%;
+    overflow-x: auto; /* SCROLL SAMPING AKTIF */
+    border-radius: 8px;
+    border: 1px solid #e5e7eb;
+    background: white;
+    
+    /* Scrollbar halus */
+    scrollbar-width: thin;
+    scrollbar-color: #d1d5db #f3f4f6;
+}
+
+/* Style Scrollbar Webkit (Chrome/Safari) */
+.table-container::-webkit-scrollbar { height: 8px; }
+.table-container::-webkit-scrollbar-track { background: #f3f4f6; }
+.table-container::-webkit-scrollbar-thumb { background-color: #d1d5db; border-radius: 4px; }
+
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.875rem;
+    min-width: 800px; /* Memaksa tabel melebar agar tidak gepeng di HP */
+}
+
+.data-table th {
+    background: #f9fafb;
+    padding: 0.75rem 1rem;
+    text-align: center; /* Header tengah */
+    font-weight: 600;
+    color: #374151;
+    border-bottom: 2px solid #e5e7eb;
+    white-space: nowrap; /* Header satu baris */
+}
+
+.data-table td {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid #e5e7eb;
+    color: #4b5563;
+    text-align: center;
+    white-space: nowrap; /* Data satu baris */
+}
+
+.status-badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 50px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    min-width: 40px;
+}
+
+.bg-green { background-color: #dcfce7; color: #166534; border: 1px solid #86efac; }
+.bg-gray { background-color: #f3f4f6; color: #6b7280; border: 1px solid #d1d5db; }
+
+/* === MOBILE RESPONSIVE (LAYOUT HP) === */
+@media (max-width: 768px) {
+    .container {
+        padding: 1rem; /* Kurangi padding container */
+    }
+
+    .report-card {
+        padding: 1.25rem; /* Kurangi padding kartu */
+    }
+
+    /* Header tumpuk ke bawah */
+    .report-header {
+        flex-direction: column;
+        align-items: stretch; /* Lebarkan full width */
+        gap: 1rem;
+    }
+
+    /* Tombol & Filter tumpuk ke bawah */
+    .actions-container {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .filter-select {
+        width: 100%;
+    }
+
+    .btn-action {
+        width: 100%; /* Tombol jadi full width */
+        justify-content: center;
+    }
+
+    /* Grid Statistik jadi 2 kolom di HP (agar tidak terlalu panjang ke bawah) */
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.75rem;
+    }
+    
+    .stat-value {
+        font-size: 1.25rem; /* Perkecil font angka */
+    }
+
+    /* Tabel */
+    .data-table th, .data-table td {
+        padding: 0.5rem; /* Kurangi padding sel */
+        font-size: 0.8rem; /* Perkecil font tabel */
+    }
+}
+@media (max-width: 400px) {
+    .stats-grid {
+        grid-template-columns: 1fr; /* Statistik jadi 1 kolom ke bawah */
+    }
+}
