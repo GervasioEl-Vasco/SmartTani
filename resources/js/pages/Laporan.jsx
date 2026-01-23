@@ -3,19 +3,18 @@ import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import ReportTable from '../components/ReportTable';
 import StatsCard from '../components/StatsCard';
+// IMPORT CONFIG AGAR IP KONSISTEN (Supaya bisa dibuka di HP)
+import { API_BASE_URL } from "../config";
 
 export default function Laporan() {
     const [dataLaporan, setDataLaporan] = useState([]);
     const [loading, setLoading] = useState(true);
 
-    // Pastikan ini mengarah ke endpoint REPORT yang baru
-    const BASE_URL = 'http://127.0.0.1:8000'; 
-    const API_ENDPOINT = '/api/sensors/report';
-
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const response = await fetch(`${BASE_URL}${API_ENDPOINT}`);
+                const response = await fetch(`${API_BASE_URL}/sensors/history`); 
+                
                 const result = await response.json();
                 
                 const formattedData = Array.isArray(result) ? result.map(item => ({
@@ -23,12 +22,13 @@ export default function Laporan() {
                     tanggal: new Date(item.created_at).toLocaleDateString('id-ID'),
                     waktu: new Date(item.created_at).toLocaleTimeString('id-ID'),
                     // Konversi ke boolean agar aman
-                    status_pompa: Boolean(item.status_pompa),
-                    status_kipas: Boolean(item.status_kipas),
-                    status_atap: Boolean(item.status_atap),
+                    status_pompa: Boolean(parseInt(item.status_pompa)),
+                    status_kipas: Boolean(parseInt(item.status_kipas)),
+                    status_kipas2: Boolean(parseInt(item.status_kipas2)),
                 })) : [];
 
-                setDataLaporan(formattedData);
+                // Kita balik urutannya biar data terbaru ada di atas (opsional)
+                setDataLaporan(formattedData.reverse());
                 setLoading(false);
             } catch (error) {
                 console.error("Gagal ambil data:", error);
@@ -38,7 +38,7 @@ export default function Laporan() {
         fetchData();
     }, []);
 
-    // ... (Bagian Statistik Biarkan Saja) ...
+    // ... (Bagian Statistik) ...
     const avgSuhu = useMemo(() => {
         if (dataLaporan.length === 0) return 0;
         const total = dataLaporan.reduce((acc, curr) => acc + parseFloat(curr.suhu_ruangan || 0), 0);
@@ -51,7 +51,7 @@ export default function Laporan() {
         return (total / dataLaporan.length).toFixed(1);
     }, [dataLaporan]);
 
-    // --- UPDATE EXPORT PDF (SESUAIKAN KOLOM) ---
+    // --- EXPORT PDF ---
     const downloadPDF = () => {
         const doc = new jsPDF();
         doc.text("Laporan Monitoring SmartTani", 14, 15);
@@ -61,56 +61,58 @@ export default function Laporan() {
         // Mapping Data untuk PDF
         const tableRows = dataLaporan.map(item => [
             `${item.tanggal} ${item.waktu}`,
-            `${item.suhu_ruangan}°C`,      // Pakai snake_case
-            `${item.kelembaban_ruangan}%`, // Pakai snake_case
-            `${item.suhu_tanah}°C`,         // Pakai snake_case
-            `${item.kelembaban_tanah}%`,   // Pakai snake_case
+            `${item.suhu_ruangan}°C`,
+            `${item.kelembaban_ruangan}%`,
+            `${item.suhu_tanah}°C`,
+            `${item.kelembaban_tanah}%`,
+            `${item.kualitas_air} PPM`,
             item.ph_air,
             item.status_pompa ? "ON" : "OFF",
             item.status_kipas ? "ON" : "OFF",
-            item.status_atap ? "BUKA" : "TUTUP"
+            item.status_kipas2 ? "BUKA" : "TUTUP"
         ]);
 
         autoTable(doc, {
-            // Header harus 9 kolom sesuai data di atas
-            head: [["Waktu", "Suhu", "Hum", "Suhu T", "Hum T", "pH", "Pompa", "Kipas", "Atap"]],
+            head: [["Waktu", "Suhu", "Hum", "Suhu T", "Hum T", "Kualitas", "pH", "Pompa", "Kipas", "Atap"]],
             body: tableRows,
             startY: 28,
             theme: 'grid',
             headStyles: { fillColor: [22, 163, 74] },
-            styles: { fontSize: 8 }
+            styles: { fontSize: 7, cellPadding: 1 } // Font dikecilkan biar muat
         });
-        doc.save(`Laporan_${Date.now()}.pdf`);
+        doc.save(`Laporan_SmartTani_${new Date().toLocaleString('id-ID')}.pdf`);
     };
 
-    // --- UPDATE EXPORT CSV (SESUAIKAN KOLOM) ---
+    // --- EXPORT CSV ---
     const downloadCSV = () => {
-        let csv = 'No,Waktu,Suhu Ruang,Lembab Ruang,Suhu Tanah,Lembab Tanah,pH Air,Pompa,Kipas,Atap\n';
+        let csv = 'No,Waktu,Suhu Ruang,Lembab Ruang,Suhu Tanah,Lembab Tanah,Kualitas Air,pH Air,Pompa,Kipas,Atap\n';
         dataLaporan.forEach((item, idx) => {
-            csv += `${idx + 1},"${item.tanggal} ${item.waktu}",${item.suhu_ruangan},${item.kelembaban_ruangan},${item.suhu_tanah},${item.kelembaban_tanah},${item.ph_air},${item.status_pompa ? 'ON' : 'OFF'},${item.status_kipas ? 'ON' : 'OFF'},${item.status_atap ? 'BUKA' : 'TUTUP'}\n`;
+            csv += `${idx + 1},"${item.tanggal} ${item.waktu}",${item.suhu_ruangan},${item.kelembaban_ruangan},${item.suhu_tanah},${item.kelembaban_tanah},${item.kualitas_air},${item.ph_air},${item.status_pompa ? 'ON' : 'OFF'},${item.status_kipas ? 'ON' : 'OFF'},${item.status_kipas2 ? 'BUKA' : 'TUTUP'}\n`;
         });
         
         const link = document.createElement('a');
         link.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8;' }));
-        link.download = `Laporan_${Date.now()}.csv`;
+        link.download = `Laporan_SmartTani_${new Date().toLocaleString('id-ID')}.csv`;
         link.click();
     };
 
     return (
         <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-100 animate-fade-in-up">
-            {/* Header sama seperti sebelumnya */}
             <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
                 <div>
-                    <h2 className="text-2xl font-bold text-gray-800">📄 Laporan Data Historis</h2>
-                    <p className="text-gray-500 text-sm mt-1">Mengambil data lengkap dari Database MySQL</p>
+                    <h2 className="text-2xl font-bold text-gray-800">Laporan Data Historis</h2>
                 </div>
                 <div className="flex gap-3">
-                    <button onClick={downloadCSV} disabled={loading || dataLaporan.length === 0} className="bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg text-sm font-bold shadow-md disabled:opacity-50">CSV</button>
-                    <button onClick={downloadPDF} disabled={loading || dataLaporan.length === 0} className="bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded-lg text-sm font-bold shadow-md disabled:opacity-50">PDF</button>
+                    <button onClick={downloadCSV} disabled={loading || dataLaporan.length === 0} className="bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg text-sm font-bold shadow-md disabled:opacity-50 transition">
+                        Download CSV
+                    </button>
+                    <button onClick={downloadPDF} disabled={loading || dataLaporan.length === 0} className="bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded-lg text-sm font-bold shadow-md disabled:opacity-50 transition">
+                        Download PDF
+                    </button>
                 </div>
             </div>
 
-            {/* Statistik */}
+            {/* Statistik Ringkas */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
                 <StatsCard label="Total Data" value={dataLaporan.length} colorClass="text-blue-600" />
                 <StatsCard label="Rata-rata Suhu" value={`${avgSuhu}°C`} colorClass="text-orange-500" />

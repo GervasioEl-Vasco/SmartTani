@@ -5,24 +5,24 @@ const DeviceGrid = ({ deviceStatus, handleToggle }) => {
     return (
         <>
             <ControlCard
-                label="Kipas Exhaust"
+                label="Kipas Exhaust 1"
                 isOn={deviceStatus.status_kipas}
                 isDisabled={deviceStatus.mode_otomatis}
                 onToggle={() => handleToggle("status_kipas", deviceStatus.status_kipas)}
             />
             <ControlCard
-                label="Pompa Irigasi"
+                label="Kipas Exhaust 2"
+                isOn={deviceStatus.status_kipas2}
+                isDisabled={deviceStatus.mode_otomatis}
+                onToggle={() => handleToggle("status_kipas2", deviceStatus.status_kipas2)}
+                
+            />
+            <ControlCard
+                label="Pompa"
                 isOn={deviceStatus.status_pompa}
                 isDisabled={deviceStatus.mode_otomatis}
                 onToggle={() => handleToggle("status_pompa", deviceStatus.status_pompa)}
-            />
-            <ControlCard
-                label="Atap Greenhouse"
-                isOn={deviceStatus.status_atap}
-                onText="TERBUKA"
-                offText="TERTUTUP"
-                isDisabled={deviceStatus.mode_otomatis}
-                onToggle={() => handleToggle("status_atap", deviceStatus.status_atap)}
+
             />
         </>
     );

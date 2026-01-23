@@ -21,7 +21,7 @@ return new class extends Migration
             $table->float('kualitas_air')->default(0);
             $table->boolean('status_kipas')->default(0);
             $table->boolean('status_pompa')->default(0);
-            $table->boolean('status_atap')->default(0);
+            $table->boolean('status_kipas2')->default(0);
             $table->timestamps();
         });
     }

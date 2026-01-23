@@ -1,13 +1,25 @@
-import { defineConfig } from 'vite';
-import laravel from 'laravel-vite-plugin';
-import react from '@vitejs/plugin-react';
+import { defineConfig } from "vite";
+import laravel from "laravel-vite-plugin";
+import react from "@vitejs/plugin-react";
 
 export default defineConfig({
     plugins: [
         laravel({
-            input: ['resources/css/app.css', 'resources/js/app.jsx'], 
+            input: ["resources/css/app.css", "resources/js/app.jsx"],
             refresh: true,
         }),
         react(),
     ],
+    server: {
+        cors: true,
+        host: "192.168.0.195",
+        port: 5173,
+        hmr: {
+            host: "192.168.0.195",
+        },
+        strictPort: true,
+    },
+    headers: {
+        "Access-Control-Allow-Origin": "*",
+    },
 });

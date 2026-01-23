@@ -7,10 +7,13 @@ import Navbar from "../components/Navbar";
 import AutoModeCard from "../components/AutoModeCard";
 import DeviceGrid from "../components/DeviceGrid";
 import SensorGrid from "../components/SensorGrid";
+import { API_BASE_URL } from "../config"; 
 
-// 1. IMPORT FIREBASE
-import { db } from "../firebaseConfig";
-import { ref, onValue, set } from "firebase/database";
+// --- FUNGSI HELPER PENTING (Biar Gak Salah Baca Data) ---
+// Ini memastikan "1", 1, "true", true semuanya dianggap NYALA.
+const parseStatus = (val) => {
+    return String(val) === "1" || val === 1 || val === true || String(val).toLowerCase() === "true";
+};
 
 export default function Dashboard() {
     const [isLoggedIn, setIsLoggedIn] = useState(
@@ -33,72 +36,111 @@ export default function Dashboard() {
     const [deviceStatus, setDeviceStatus] = useState({
         status_kipas: false,
         status_pompa: false,
-        status_atap: false,
+        status_kipas2: false,
         mode_otomatis: false,
     });
 
-    // 2. KONEKSI KE FIREBASE (MENGGANTIKAN FETCH LARAVEL)
+    // --- STATE PENGUNCI (ANTI MENTAL) ---
+    const [isUpdating, setIsUpdating] = useState(false);
+
+    // =================================================================
+    // 1. AMBIL DATA DARI LARAVEL (POLLING)
+    // =================================================================
     useEffect(() => {
         if (!isLoggedIn) return;
 
-        // A. DENGAR SENSOR (Realtime)
-        const sensorRef = ref(db, "sensors");
-        const unsubscribeSensor = onValue(sensorRef, (snapshot) => {
-            const data = snapshot.val();
-            if (data) {
-                setSensorData({
-                    suhuRuangan: data.suhu_ruangan || 0,
-                    kelembabanRuangan: data.kelembaban_ruangan || 0,
-                    phAir: data.ph_air || 0,
-                    suhuTanah: data.suhu_tanah || 0,
-                    kelembabanTanah: data.kelembaban_tanah || 0,
-                    kualitasAir: data.kualitas_air || 0, // Jika ada sensor TDS
-                });
+        const fetchData = async () => {
+            try {
+                const response = await fetch(`${API_BASE_URL}/sensors/current`);
+                if (response.ok) {
+                    const data = await response.json();
+
+                    console.log("Data Mentah dari Laravel:", data);
+                    
+                    // 1. UPDATE SENSOR (Selalu update)
+                    setSensorData({
+                        suhuRuangan: parseFloat(data.suhu_ruangan || 0),
+                        kelembabanRuangan: parseFloat(data.kelembaban_ruangan || 0),
+                        phAir: parseFloat(data.ph_air || 0),
+                        suhuTanah: parseFloat(data.suhu_tanah || 0),
+                        kelembabanTanah: parseFloat(data.kelembaban_tanah || 0),
+                        kualitasAir: parseFloat(data.kualitas_air || 0),
+                    });
+
+                    // 2. UPDATE STATUS ALAT 
+                    // Logika: Hanya update status alat dari DB kalau user TIDAK sedang menekan tombol.
+                    if (!isUpdating) {
+                        setDeviceStatus({
+                            // PERBAIKAN: Gunakan parseStatus biar akurat
+                            status_kipas: parseStatus(data.status_kipas),
+                            status_pompa: parseStatus(data.status_pompa),
+                            status_kipas2: parseStatus(data.status_kipas2),
+                            mode_otomatis: parseStatus(data.mode_otomatis),
+                        });
+                    }
+                }
+            } catch (error) {
+                console.error("Gagal konek ke Laravel:", error);
             }
-        });
-
-        // B. DENGAR STATUS ALAT (Agar sinkron dengan ESP32/HP lain)
-        const deviceRef = ref(db, "devices");
-        const unsubscribeDevice = onValue(deviceRef, (snapshot) => {
-            const data = snapshot.val();
-            if (data) {
-                setDeviceStatus({
-                    status_kipas: Boolean(data.kipas),
-                    status_pompa: Boolean(data.pompa),
-                    status_atap: Boolean(data.atap),
-                    mode_otomatis: Boolean(data.mode_otomatis),
-                });
-            }
-        });
-
-        // Cleanup saat pindah halaman
-        return () => {
-            unsubscribeSensor();
-            unsubscribeDevice();
-        };
-    }, [isLoggedIn]);
-
-    // 3. FUNGSI KLIK TOMBOL (Kirim ke Firebase)
-    const handleToggle = (key, currentValue) => {
-        const dbKeyMap = {
-            status_kipas: "kipas",
-            status_pompa: "pompa",
-            status_atap: "atap",
-            mode_otomatis: "mode_otomatis",
         };
 
-        const dbKey = dbKeyMap[key];
+        // Fetch pertama kali
+        fetchData();
+        
+        // Polling tiap 2 detik
+        const interval = setInterval(fetchData, 2000); 
+
+        return () => clearInterval(interval);
+
+    }, [isLoggedIn, isUpdating]); 
+
+
+    // =================================================================
+    // 2. FUNGSI KLIK TOMBOL (FIXED)
+    // =================================================================
+    const handleToggle = async (key, currentValue) => {
+        // 1. KUNCI POLLING (Supaya data lama dari server gak menimpa tombol kita)
+        setIsUpdating(true);
+
+        // 2. Tentukan Nilai Baru (Boolean)
         const newValue = !currentValue;
 
-        // Update Lokal biar cepat
+        // 3. OPTIMISTIC UPDATE (Ubah UI duluan biar cepat & gak mantul)
         setDeviceStatus((prev) => ({ ...prev, [key]: newValue }));
 
-        // Kirim ke Firebase
-        set(ref(db, "devices/" + dbKey), newValue).catch((error) => {
-            console.error("Error Firebase:", error);
-            // Kembalikan jika gagal
+        try {
+            const endpoint = `${API_BASE_URL}/device/status`; 
+
+            // 4. KIRIM KE SERVER (Format Angka 1 atau 0)
+            // Database lebih suka angka 1/0 daripada true/false
+            const payload = {
+                [key]: newValue ? 1 : 0 
+            };
+
+            await fetch(endpoint, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            });
+
+            console.log(`Berhasil update ${key} ke ${newValue ? 1 : 0}`);
+
+            // 5. Buka Kuncian setelah 3 detik
+            // Kita kasih waktu server buat simpan data, baru kita polling lagi
+            setTimeout(() => {
+                setIsUpdating(false); 
+            }, 3000);
+
+        } catch (error) {
+            console.error("Gagal update status:", error);
+            // Kalau error beneran, baru balikin tombolnya (Rollback)
             setDeviceStatus((prev) => ({ ...prev, [key]: currentValue }));
-        });
+            setIsUpdating(false);
+            alert("Gagal terhubung ke Server!");
+        }
     };
 
     if (!isLoggedIn) return <Login onLogin={() => setIsLoggedIn(true)} />;
@@ -115,27 +157,36 @@ export default function Dashboard() {
                 <div className="mb-8 border-b border-gray-200 pb-5">
                     <h1 className="text-3xl font-bold text-gray-900">
                         {activeTab === "Dashboard" && "Dashboard Monitoring"}
-                        {activeTab === "Analisis" && "Analisis Data"}
-                        {activeTab === "Laporan" && "Laporan Data"}
-                        {activeTab === "ManajemenUser" && "Manajemen User"}
+                        {activeTab === "Analisis" && "Analisis Tanaman"}
+                        {activeTab === "Laporan" && "Laporan & Riwayat"}
+                        {activeTab === "ManajemenUser" && "Manajemen Pengguna"}
                     </h1>
                 </div>
 
                 {activeTab === "Dashboard" && (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        
+                        {/* 1. KARTU OTOMATIS */}
                         <AutoModeCard
                             isAuto={deviceStatus.mode_otomatis}
-                            onToggle={() =>
-                                handleToggle(
-                                    "mode_otomatis",
-                                    deviceStatus.mode_otomatis
-                                )
+                            onToggle={
+                                userRole === 'admin' 
+                                ? () => handleToggle("mode_otomatis", deviceStatus.mode_otomatis)
+                                : null
                             }
                         />
+
+                        {/* 2. GRID TOMBOL ALAT */}
                         <DeviceGrid
                             deviceStatus={deviceStatus}
-                            handleToggle={handleToggle}
+                            handleToggle={
+                                userRole === 'admin' 
+                                ? handleToggle 
+                                : () => alert("Akses Ditolak: Hanya Admin yang boleh mengontrol alat!") 
+                            }
                         />
+
+                        {/* 3. GRID SENSOR */}
                         <SensorGrid sensorData={sensorData} />
                     </div>
                 )}

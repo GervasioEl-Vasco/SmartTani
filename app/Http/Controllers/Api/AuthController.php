@@ -4,89 +4,100 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use App\Models\User;
+use Illuminate\Support\Facades\Validator;
 
 class AuthController extends Controller
 {
-    // 1. LOGIN
-    public function login(Request $request)
+    // 1. LIHAT SEMUA USER (index) -> Ini yang tadi error 500
+    public function index()
     {
-        $request->validate([
-            'email' => 'required|email',
-            'password' => 'required',
-        ]);
-
-        $user = User::where('email', $request->email)->first();
-
-        if (! $user || ! Hash::check($request->password, $user->password)) {
-            return response()->json(['message' => 'Email atau Password salah'], 401);
-        }
-
-        // Hapus token lama biar bersih, lalu buat baru
-        $user->tokens()->delete();
-        $token = $user->createToken('auth_token')->plainTextToken;
-
-        return response()->json([
-            'message' => 'Login sukses',
-            'token' => $token,
-            'user' => [
-                'name' => $user->name,
-                'email' => $user->email,
-                'role' => $user->role,
-            ]
-        ]);
+        // Ambil semua user
+        $users = User::all();
+        return response()->json($users);
     }
 
-    // 2. LOGOUT
-    public function logout(Request $request)
-    {
-        $request->user()->currentAccessToken()->delete();
-        return response()->json(['message' => 'Logout sukses']);
-    }
-
-    // 3. LIST SEMUA USER (Untuk halaman Manajemen User)
-    public function index(Request $request)
-    {
-        if ($request->user()->role !== 'admin') {
-            return response()->json(['message' => 'Akses ditolak. Hanya Admin yang boleh.'], 403);
-        }
-        return User::all();
-    }
-
-    // 4. TAMBAH USER BARU
+    // 2. REGISTER
     public function register(Request $request)
     {
-        if ($request->user()->role !== 'admin') {
-            return response()->json(['message' => 'Akses ditolak. Hanya Admin yang boleh.'], 403);
-}
-        $request->validate([
-            'name' => 'required',
-            'email' => 'required|email|unique:users',
-            'password' => 'required|min:6'
+        $validator = Validator::make($request->all(), [
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users',
+            'password' => 'required|string|min:6',
+            'role' => 'nullable|string'
         ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
 
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
+            'role' => $request->role ?? 'user'
         ]);
 
-        return response()->json(['message' => 'User berhasil dibuat', 'data' => $user]);
+        $token = $user->createToken('auth_token')->plainTextToken;
+
+        return response()->json([
+            'message' => 'User berhasil dibuat',
+            'data' => $user,
+            'access_token' => $token,
+            'token_type' => 'Bearer'
+        ]);
     }
 
-    // 5. HAPUS USER
-    public function destroy($id, Request $request)
+    // 3. LOGIN
+    public function login(Request $request)
     {
-        if ($request->user()->role !== 'admin') {
-            return response()->json(['message' => 'Akses ditolak. Hanya Admin yang boleh.'], 403);
-}
-        $user = User::find($id);
-        if($user) {
-            $user->delete();
-            return response()->json(['message' => 'User dihapus']);
+        if (!Auth::attempt($request->only('email', 'password'))) {
+            return response()->json(['message' => 'Email atau Password salah'], 401);
         }
-        return response()->json(['message' => 'User tidak ditemukan'], 404);
+
+        $user = User::where('email', $request['email'])->firstOrFail();
+        $token = $user->createToken('auth_token')->plainTextToken;
+
+        return response()->json([
+            'message' => 'Login sukses',
+            'user' => $user,
+            'access_token' => $token,
+            'token_type' => 'Bearer'
+        ]);
+    }
+
+    // 4. LOGOUT
+    public function logout(Request $request)
+    {
+        $request->user()->currentAccessToken()->delete();
+        return response()->json(['message' => 'Berhasil logout']);
+    }
+
+    // 5. HAPUS USER (destroy)
+    public function destroy($id)
+    {
+        $user = User::find($id);
+
+        if (!$user) {
+            return response()->json(['message' => 'User tidak ditemukan'], 404);
+        }
+
+        // --- BAGIAN INI YANG SERING SALAH KETIK ---
+        
+        // Ambil ID user yang sedang login sekarang
+        $currentUserId = Auth::id(); // Pakai Auth::id() lebih aman
+        
+        // Cek jangan sampai menghapus diri sendiri
+        // Perhatikan: $user->id (TANPA KURUNG)
+        if ($currentUserId == $user->id) { 
+            return response()->json(['message' => 'Anda tidak bisa menghapus akun sendiri!'], 403);
+        }
+        // ------------------------------------------
+
+        $user->delete();
+
+        return response()->json(['message' => 'User berhasil dihapus']);
     }
 }

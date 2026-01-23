@@ -14,7 +14,7 @@ class DeviceSetting extends Model
     protected $fillable = [
         'status_kipas',
         'status_pompa',
-        'status_atap',
+        'status_kipas2',
         'mode_otomatis'
     ];
 }

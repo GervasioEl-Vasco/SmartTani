@@ -1,70 +1,67 @@
 import React from 'react';
 
-const ReportTable = ({ data, loading }) => {
+export default function ReportTable({ data, loading }) {
+  if (loading) {
     return (
-        <div className="overflow-x-auto rounded-lg border border-gray-200 mt-4">
-            <table className="min-w-full divide-y divide-gray-200 text-sm">
-                <thead className="bg-green-50">
-                    <tr>
-                        <th className="px-4 py-3 text-left font-bold text-green-800">Waktu</th>
-                        <th className="px-4 py-3 text-center font-bold text-gray-600">Suhu Udara</th>
-                        <th className="px-4 py-3 text-center font-bold text-gray-600">Lembab Udara</th>
-                        <th className="px-4 py-3 text-center font-bold text-gray-600">Suhu Tanah</th>
-                        <th className="px-4 py-3 text-center font-bold text-gray-600">Lembab Tanah</th>
-                        <th className="px-4 py-3 text-center font-bold text-gray-600">pH Air</th>
-                        
-                        {/* --- STATUS DIPISAH JADI 3 KOLOM --- */}
-                        <th className="px-4 py-3 text-center font-bold text-gray-600">Pompa</th>
-                        <th className="px-4 py-3 text-center font-bold text-gray-600">Kipas</th>
-                        <th className="px-4 py-3 text-center font-bold text-gray-600">Atap</th>
-                    </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-200 bg-white">
-                    {loading ? (
-                        <tr><td colSpan="9" className="p-4 text-center text-gray-400">Menunggu data...</td></tr>
-                    ) : data.length === 0 ? (
-                        <tr><td colSpan="9" className="p-4 text-center text-gray-400">Belum ada data terekam.</td></tr>
-                    ) : (
-                        data.map((item, index) => (
-                            <tr key={index} className="hover:bg-gray-50 transition-colors">
-                                <td className="px-4 py-2 text-gray-500 whitespace-nowrap">
-                                    {item.tanggal} <span className="text-xs font-bold text-gray-400 ml-1">{item.waktu}</span>
-                                </td>
-                                
-                                {/* PERBAIKAN: Gunakan snake_case (suhu_ruangan) sesuai database MySQL */}
-                                <td className="px-4 py-2 text-center font-medium">{item.suhu_ruangan}°C</td>
-                                <td className="px-4 py-2 text-center">{item.kelembaban_ruangan}%</td>
-                                <td className="px-4 py-2 text-center">{item.suhu_tanah}°C</td>
-                                <td className="px-4 py-2 text-center">{item.kelembaban_tanah}%</td>
-                                <td className="px-4 py-2 text-center">
-                                    <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${item.ph_air < 6 || item.ph_air > 8 ? 'bg-red-100 text-red-600' : 'bg-green-100 text-green-600'}`}>
-                                        {item.ph_air}
-                                    </span>
-                                </td>
-
-                                {/* --- STATUS DIPISAH --- */}
-                                <td className="px-4 py-2 text-center">
-                                    <span className={`px-2 py-1 rounded text-xs font-bold ${item.status_pompa ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-400'}`}>
-                                        {item.status_pompa ? 'ON' : 'OFF'}
-                                    </span>
-                                </td>
-                                <td className="px-4 py-2 text-center">
-                                    <span className={`px-2 py-1 rounded text-xs font-bold ${item.status_kipas ? 'bg-orange-100 text-orange-700' : 'bg-gray-100 text-gray-400'}`}>
-                                        {item.status_kipas ? 'ON' : 'OFF'}
-                                    </span>
-                                </td>
-                                <td className="px-4 py-2 text-center">
-                                    <span className={`px-2 py-1 rounded text-xs font-bold ${item.status_atap ? 'bg-purple-100 text-purple-700' : 'bg-gray-100 text-gray-400'}`}>
-                                        {item.status_atap ? 'BUKA' : 'TUTUP'}
-                                    </span>
-                                </td>
-                            </tr>
-                        ))
-                    )}
-                </tbody>
-            </table>
-        </div>
+      <div className="text-center py-20 bg-gray-50 rounded-lg border border-dashed border-gray-300">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600 mx-auto mb-2"></div>
+        <p className="text-gray-400 text-sm">Memuat data tabel...</p>
+      </div>
     );
-};
+  }
 
-export default ReportTable;
+  if (data.length === 0) {
+    return (
+      <div className="text-center py-20 bg-gray-50 rounded-lg border border-dashed border-gray-300">
+        <p className="text-gray-400">Belum ada data laporan.</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="overflow-x-auto border border-gray-200 rounded-lg shadow-sm">
+      <table className="min-w-full divide-y divide-gray-200">
+        <thead className="bg-gray-50">
+          <tr>
+            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Waktu</th>
+            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Suhu R.</th>
+            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Lembab R.</th>
+            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Suhu T.</th>
+            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Lembab T.</th>
+            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">kualitas air</th>
+            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">pH Air</th>
+            <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+          </tr>
+        </thead>
+        <tbody className="bg-white divide-y divide-gray-200">
+          {data.map((item, index) => (
+            <tr key={index} className="hover:bg-gray-50 transition-colors">
+              <td className="px-4 py-3 text-sm text-gray-900 whitespace-nowrap">
+                <div className="font-medium">{item.tanggal}</div>
+                <div className="text-xs text-gray-500">{item.waktu}</div>
+              </td>
+              <td className="px-4 py-3 text-sm text-gray-600">{item.suhu_ruangan}°C</td>
+              <td className="px-4 py-3 text-sm text-gray-600">{item.kelembaban_ruangan}%</td>
+              <td className="px-4 py-3 text-sm text-gray-600">{item.suhu_tanah}°C</td>
+              <td className="px-4 py-3 text-sm text-gray-600">{item.kelembaban_tanah}%</td>
+              <td className="px-4 py-3 text-sm text-gray-600">{item.kualitas_air}PPM</td>
+              <td className="px-4 py-3 text-sm text-gray-600 font-medium text-purple-600">{item.ph_air}</td>
+              <td className="px-4 py-3 text-sm text-center space-x-1">
+                {/* Badge Status Mini */}
+                <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${item.status_pompa ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-400'}`}>
+                  P
+                </span>
+                <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${item.status_kipas ? 'bg-orange-100 text-orange-700' : 'bg-gray-100 text-gray-400'}`}>
+                  K
+                </span>
+                <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${item.status_kipas2 ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-400'}`}>
+                  A
+                </span>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}

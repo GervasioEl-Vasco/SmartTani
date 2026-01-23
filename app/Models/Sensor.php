@@ -9,19 +9,20 @@ class Sensor extends Model
 {
     use HasFactory;
 
-    // Sambungkan ke tabel yang Anda buat di HeidiSQL
+    // Sambungkan ke tabel
     protected $table = 'tb_sensor';
+    protected $guarded = [];
 
-    // Daftar kolom (sesuai nama di HeidiSQL)
     protected $fillable = [
         'suhu_ruangan',
         'kelembaban_ruangan',
-        'ph_air',
-        'kualitas_air',
         'suhu_tanah',
         'kelembaban_tanah',
-        'status_kipas',
+        'ph_air',
+        'kualitas_air',
         'status_pompa',
-        'status_atap'
+        'status_kipas',
+        'status_kipas2',
+        'mode_otomatis' // Pastikan ini ada!
     ];
 }

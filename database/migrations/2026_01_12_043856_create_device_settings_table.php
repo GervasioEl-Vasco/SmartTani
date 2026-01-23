@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->boolean('status_kipas')->default(0);
             $table->boolean('status_pompa')->default(0);
-            $table->boolean('status_atap')->default(0);
+            $table->boolean('status_kipas2')->default(0);
             $table->boolean('mode_otomatis')->default(0);
             $table->timestamps();
         });

@@ -5,7 +5,7 @@
     "name": "smarttani",
     "scripts": {
         "build": "vite build",
-        "dev": "vite"
+        "dev": "vite --host"
     },
     "devDependencies": {
         "@tailwindcss/vite": "^4.0.0",

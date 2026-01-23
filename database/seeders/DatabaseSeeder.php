@@ -15,6 +15,7 @@ class DatabaseSeeder extends Seeder
             'name' => 'Admin SmartTani',
             'email' => 'admin@smarttani.com', // Email untuk login
             'password' => Hash::make('smarttani12345'), // Password login
+            'role' => 'admin'
         ]);
     }
 }
