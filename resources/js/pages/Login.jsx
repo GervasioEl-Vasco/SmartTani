@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-const API_BASE_URL = "http://192.168.0.195:8000/api"; 
+import { API_BASE_URL } from "../config";
 
 export default function Login({ onLogin }) {
     const [email, setEmail] = useState('');

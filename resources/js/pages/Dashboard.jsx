@@ -57,7 +57,7 @@ export default function Dashboard() {
 
                     console.log("Data Mentah dari Laravel:", data);
                     
-                    // 1. UPDATE SENSOR (Selalu update)
+                    // 1. UPDATE SENSOR 
                     setSensorData({
                         suhuRuangan: parseFloat(data.suhu_ruangan || 0),
                         kelembabanRuangan: parseFloat(data.kelembaban_ruangan || 0),
