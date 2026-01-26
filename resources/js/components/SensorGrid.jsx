@@ -26,7 +26,7 @@ const SensorGrid = ({ sensorData }) => {
                 unit="pH"
             />
             <SimpleCard
-                label="Suhu Tanah"
+                label="Suhu Tanah/Media Tanam"
                 value={sensorData.suhuTanah}
                 max={100}
                 color="#f97316"

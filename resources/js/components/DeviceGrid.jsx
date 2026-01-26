@@ -11,17 +11,17 @@ const DeviceGrid = ({ deviceStatus, handleToggle }) => {
                 onToggle={() => handleToggle("status_kipas", deviceStatus.status_kipas)}
             />
             <ControlCard
+                label="Pompa Air"
+                isOn={deviceStatus.status_pompa}
+                isDisabled={deviceStatus.mode_otomatis}
+                onToggle={() => handleToggle("status_pompa", deviceStatus.status_pompa)}
+                
+            />
+            <ControlCard
                 label="Kipas Exhaust 2"
                 isOn={deviceStatus.status_kipas2}
                 isDisabled={deviceStatus.mode_otomatis}
                 onToggle={() => handleToggle("status_kipas2", deviceStatus.status_kipas2)}
-                
-            />
-            <ControlCard
-                label="Pompa"
-                isOn={deviceStatus.status_pompa}
-                isDisabled={deviceStatus.mode_otomatis}
-                onToggle={() => handleToggle("status_pompa", deviceStatus.status_pompa)}
 
             />
         </>
