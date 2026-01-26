@@ -1,1 +1,1 @@
-export const API_BASE_URL = "https://smarttani.site";
+export const API_BASE_URL = "https://smarttani.site/api";
