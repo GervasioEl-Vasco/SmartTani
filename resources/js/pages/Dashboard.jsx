@@ -49,8 +49,7 @@ export default function Dashboard() {
 
         const fetchData = async () => {
             try {
-                // [PERBAIKAN 1]: Tambahkan /api di sini!
-                const response = await fetch(`${API_BASE_URL}/api/sensors/current`);
+                const response = await fetch(`${API_BASE_URL}/sensors/current`);
                 
                 if (response.ok) {
                     const data = await response.json();
@@ -98,8 +97,8 @@ export default function Dashboard() {
         setDeviceStatus((prev) => ({ ...prev, [key]: newValue }));
 
         try {
-            // [PERBAIKAN 2]: Tambahkan /api di sini juga!
-            const endpoint = `${API_BASE_URL}/api/device/status`; 
+      
+            const endpoint = `${API_BASE_URL}/device/status`; 
 
             const payload = {
                 [key]: newValue ? 1 : 0 
