@@ -1,20 +1,18 @@
 <?php
 
-use Illuminate\Foundation\Application;
 use Illuminate\Http\Request;
 
 define('LARAVEL_START', microtime(true));
 
-// Determine if the application is in maintenance mode...
+// HAPUS tanda '../' karena file maintenance ada di folder yang sama (sejajar)
 if (file_exists($maintenance = __DIR__.'/storage/framework/maintenance.php')) {
     require $maintenance;
 }
 
-// Register the Composer autoloader...
+// HAPUS tanda '../'. Langsung panggil vendor.
 require __DIR__.'/vendor/autoload.php';
 
-// Bootstrap Laravel and handle the request...
-/** @var Application $app */
+// HAPUS tanda '../'. Langsung panggil bootstrap.
 $app = require_once __DIR__.'/bootstrap/app.php';
 
 $app->handleRequest(Request::capture());

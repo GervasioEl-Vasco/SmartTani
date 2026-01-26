@@ -7,19 +7,17 @@ export default defineConfig({
         laravel({
             input: ["resources/css/app.css", "resources/js/app.jsx"],
             refresh: true,
+            // Pastikan hasil build masuk ke folder bernama 'build'
+            buildDirectory: 'build', 
         }),
         react(),
     ],
+    // Konfigurasi server ini aman dibiarkan untuk local development
     server: {
-        cors: true,
         host: "0.0.0.0",
         port: 5173,
         hmr: {
             host: "localhost",
         },
-        strictPort: true,
-    },
-    headers: {
-        "Access-Control-Allow-Origin": "*",
     },
 });
