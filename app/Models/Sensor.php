@@ -19,10 +19,6 @@ class Sensor extends Model
         'suhu_tanah',
         'kelembaban_tanah',
         'ph_air',
-        'kualitas_air',
-        'status_pompa',
-        'status_kipas',
-        'status_kipas2',
-        'mode_otomatis' // Pastikan ini ada!
+        'kualitas_air'
     ];
 }

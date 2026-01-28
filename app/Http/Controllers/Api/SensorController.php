@@ -109,7 +109,7 @@ class SensorController extends Controller
     public function history()
     {
         $data = Sensor::latest()
-            ->take(50)
+            ->take(500)
             ->get()
             ->reverse() 
             ->values();
@@ -126,7 +126,7 @@ class SensorController extends Controller
 
         $data = Sensor::whereDate('created_at', $date)
             ->orderBy('created_at', 'desc')
-            ->take(100)
+            ->take(500)
             ->get();
 
         return response()->json($data);

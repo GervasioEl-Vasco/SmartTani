@@ -7,7 +7,7 @@ import Navbar from "../components/Navbar";
 import AutoModeCard from "../components/AutoModeCard";
 import DeviceGrid from "../components/DeviceGrid";
 import SensorGrid from "../components/SensorGrid";
-import { API_BASE_URL } from "../config"; 
+import API_BASE_URL from "../config";
 
 // --- FUNGSI HELPER PENTING (Biar Gak Salah Baca Data) ---
 // Ini memastikan "1", 1, "true", true semuanya dianggap NYALA.
@@ -35,8 +35,8 @@ export default function Dashboard() {
     // State Status Alat
     const [deviceStatus, setDeviceStatus] = useState({
         status_kipas: false,
-        status_pompa: false,
         status_kipas2: false,
+        status_pompa: false,
         mode_otomatis: false,
     });
 
@@ -56,7 +56,7 @@ export default function Dashboard() {
                     const data = await response.json();
 
                     console.log("Data Mentah dari Laravel:", data);
-                    
+
                     // 1. UPDATE SENSOR (Selalu update)
                     setSensorData({
                         suhuRuangan: parseFloat(data.suhu_ruangan || 0),
@@ -73,8 +73,8 @@ export default function Dashboard() {
                         setDeviceStatus({
                             // PERBAIKAN: Gunakan parseStatus biar akurat
                             status_kipas: parseStatus(data.status_kipas),
-                            status_pompa: parseStatus(data.status_pompa),
                             status_kipas2: parseStatus(data.status_kipas2),
+                            status_pompa: parseStatus(data.status_pompa),
                             mode_otomatis: parseStatus(data.mode_otomatis),
                         });
                     }
@@ -86,13 +86,13 @@ export default function Dashboard() {
 
         // Fetch pertama kali
         fetchData();
-        
-        // Polling tiap 2 detik
-        const interval = setInterval(fetchData, 2000); 
+
+        // Polling tiap 5 menit
+        const interval = setInterval(fetchData, 300000);
 
         return () => clearInterval(interval);
 
-    }, [isLoggedIn, isUpdating]); 
+    }, [isLoggedIn, isUpdating]);
 
 
     // =================================================================
@@ -109,12 +109,12 @@ export default function Dashboard() {
         setDeviceStatus((prev) => ({ ...prev, [key]: newValue }));
 
         try {
-            const endpoint = `${API_BASE_URL}/device/status`; 
+            const endpoint = `${API_BASE_URL}/device/status`;
 
             // 4. KIRIM KE SERVER (Format Angka 1 atau 0)
             // Database lebih suka angka 1/0 daripada true/false
             const payload = {
-                [key]: newValue ? 1 : 0 
+                [key]: newValue ? 1 : 0
             };
 
             await fetch(endpoint, {
@@ -131,7 +131,7 @@ export default function Dashboard() {
             // 5. Buka Kuncian setelah 3 detik
             // Kita kasih waktu server buat simpan data, baru kita polling lagi
             setTimeout(() => {
-                setIsUpdating(false); 
+                setIsUpdating(false);
             }, 3000);
 
         } catch (error) {
@@ -165,14 +165,14 @@ export default function Dashboard() {
 
                 {activeTab === "Dashboard" && (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        
+
                         {/* 1. KARTU OTOMATIS */}
                         <AutoModeCard
                             isAuto={deviceStatus.mode_otomatis}
                             onToggle={
-                                userRole === 'admin' 
-                                ? () => handleToggle("mode_otomatis", deviceStatus.mode_otomatis)
-                                : null
+                                userRole === 'admin'
+                                    ? () => handleToggle("mode_otomatis", deviceStatus.mode_otomatis)
+                                    : null
                             }
                         />
 
@@ -180,9 +180,9 @@ export default function Dashboard() {
                         <DeviceGrid
                             deviceStatus={deviceStatus}
                             handleToggle={
-                                userRole === 'admin' 
-                                ? handleToggle 
-                                : () => alert("Akses Ditolak: Hanya Admin yang boleh mengontrol alat!") 
+                                userRole === 'admin'
+                                    ? handleToggle
+                                    : () => alert("Akses Ditolak: Hanya Admin yang boleh mengontrol alat!")
                             }
                         />
 

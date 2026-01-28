@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import ChartCard from '../components/ChartCard';
 // IMPORT CONFIG AGAR IP KONSISTEN
-import { API_BASE_URL } from "../config";
+import API_BASE_URL from "../config";
 
 export default function Analisis() { 
     // Props { latestData } sudah dihapus sesuai permintaan

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import UserForm from "../components/UserForm"; // Import Form
 import UserTable from "../components/UserTable"; // Import Tabel
-import { API_BASE_URL } from "../config";
+import API_BASE_URL from "../config";
 
 export default function ManajemenUser() {
     const [users, setUsers] = useState([]);

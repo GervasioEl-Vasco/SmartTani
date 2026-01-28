@@ -4,19 +4,21 @@ import autoTable from 'jspdf-autotable';
 import ReportTable from '../components/ReportTable';
 import StatsCard from '../components/StatsCard';
 // IMPORT CONFIG AGAR IP KONSISTEN (Supaya bisa dibuka di HP)
-import { API_BASE_URL } from "../config";
+import API_BASE_URL from "../config";
 
 export default function Laporan() {
     const [dataLaporan, setDataLaporan] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]); // Default to today
 
     useEffect(() => {
         const fetchData = async () => {
+            setLoading(true);
             try {
-                const response = await fetch(`${API_BASE_URL}/sensors/history`); 
-                
+                const response = await fetch(`${API_BASE_URL}/sensors/report?date=${selectedDate}`);
+
                 const result = await response.json();
-                
+
                 const formattedData = Array.isArray(result) ? result.map(item => ({
                     ...item,
                     tanggal: new Date(item.created_at).toLocaleDateString('id-ID'),
@@ -36,7 +38,7 @@ export default function Laporan() {
             }
         };
         fetchData();
-    }, []);
+    }, [selectedDate]);
 
     // ... (Bagian Statistik) ...
     const avgSuhu = useMemo(() => {
@@ -101,6 +103,16 @@ export default function Laporan() {
             <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
                 <div>
                     <h2 className="text-2xl font-bold text-gray-800">Laporan Data Historis</h2>
+                    <div className="mt-4">
+                        <label htmlFor="date-picker" className="block text-sm font-medium text-gray-700 mb-2">Pilih Tanggal:</label>
+                        <input
+                            type="date"
+                            id="date-picker"
+                            value={selectedDate}
+                            onChange={(e) => setSelectedDate(e.target.value)}
+                            className="px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        />
+                    </div>
                 </div>
                 <div className="flex gap-3">
                     <button onClick={downloadCSV} disabled={loading || dataLaporan.length === 0} className="bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg text-sm font-bold shadow-md disabled:opacity-50 transition">

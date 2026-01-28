@@ -16,8 +16,8 @@ use App\Http\Controllers\Api\DeviceController;
 // ========================================================================
 // 1. ROUTE AUTH & USER (Manajemen Pengguna)
 // ========================================================================
-Route::post('/auth/login', [AuthController::class, 'login']);
-Route::post('/auth/register', [AuthController::class, 'register']);
+Route::post(uri: '/auth/login', action: [AuthController::class, 'login']);
+Route::post(uri: '/auth/register', action: [AuthController::class, 'register']);
 
 
 Route::middleware('auth:sanctum')->group(function(){

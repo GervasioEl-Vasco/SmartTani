@@ -28,16 +28,16 @@ class DeviceController extends Controller
         // 1. Ambil data pertama, atau buat baru jika kosong
         $device = DeviceSetting::firstOrNew([], [
             'status_kipas' => 0,
-            'status_pompa' => 0,
             'status_kipas2' => 0,
+            'status_pompa' => 0,
             'mode_otomatis' => 0
         ]);
 
         // 2. UPDATE DATA (Lebih Robust/Kuat)
         // Logikanya: Ambil input dari React. Jika tidak ada, biarkan nilai lama ($device->xxx)
         $device->status_kipas  = $request->input('status_kipas', $device->status_kipas);
-        $device->status_pompa  = $request->input('status_pompa', $device->status_pompa);
         $device->status_kipas2   = $request->input('status_kipas2', $device->status_kipas2);
+        $device->status_pompa  = $request->input('status_pompa', $device->status_pompa);
         $device->mode_otomatis = $request->input('mode_otomatis', $device->mode_otomatis);
 
         // 3. Simpan ke Database
