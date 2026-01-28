@@ -1,0 +1,52 @@
+<IfModule mod_rewrite.c>
+    <IfModule mod_negotiation.c>
+        Options -MultiViews -Indexes
+    </IfModule>
+
+    RewriteEngine On
+
+    # ----------------------------------------------------------------------
+    # 1. KEAMANAN (WAJIB UNTUK STRUKTUR FLAT)
+    # ----------------------------------------------------------------------
+    
+    # Blokir akses langsung ke file .env (SANGAT PENTING)
+    <Files .env>
+        Order allow,deny
+        Deny from all
+    </Files>
+
+    # Blokir akses ke file sistem lainnya
+    <FilesMatch "^(composer\.json|composer\.lock|package\.json|package-lock\.json|vite\.config\.js|artisan)$">
+        Order allow,deny
+        Deny from all
+    </FilesMatch>
+
+    # Blokir akses ke folder sistem Laravel
+    # Jika ada yang mencoba buka smarttani.site/app/User.php, akan ditolak.
+    RewriteRule ^(app|bootstrap|config|database|resources|routes|storage|tests|vendor) - [F,L]
+
+    # Blokir akses ke folder hidden (diawali titik) kecuali .well-known (untuk SSL)
+    RewriteRule "(^|/)\.(?!well-known)" - [F]
+
+    # ----------------------------------------------------------------------
+    # 2. KONFIGURASI LARAVEL (STANDAR)
+    # ----------------------------------------------------------------------
+
+    # Handle Authorization Header
+    RewriteCond %{HTTP:Authorization} .
+    RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+
+    # Handle X-XSRF-Token Header
+    RewriteCond %{HTTP:x-xsrf-token} .
+    RewriteRule .* - [E=HTTP_X_XSRF_TOKEN:%{HTTP:X-XSRF-Token}]
+
+    # Redirect Trailing Slashes If Not A Folder...
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteCond %{REQUEST_URI} (.+)/$
+    RewriteRule ^ %1 [L,R=301]
+
+    # Send Requests To Front Controller...
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteRule ^ index.php [L]
+</IfModule>

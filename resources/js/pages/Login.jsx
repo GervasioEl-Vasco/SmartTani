@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-import { API_BASE_URL } from "@/config";
+import { API_BASE_URL } from "../config";
 
 export default function Login({ onLogin }) {
     const [email, setEmail] = useState('');

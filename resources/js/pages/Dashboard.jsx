@@ -9,8 +9,7 @@ import DeviceGrid from "../components/DeviceGrid";
 import SensorGrid from "../components/SensorGrid";
 import API_BASE_URL from "../config";
 
-// --- FUNGSI HELPER PENTING (Biar Gak Salah Baca Data) ---
-// Ini memastikan "1", 1, "true", true semuanya dianggap NYALA.
+// --- FUNGSI HELPER PENTING ---
 const parseStatus = (val) => {
     return String(val) === "1" || val === 1 || val === true || String(val).toLowerCase() === "true";
 };
@@ -40,7 +39,6 @@ export default function Dashboard() {
         mode_otomatis: false,
     });
 
-    // --- STATE PENGUNCI (ANTI MENTAL) ---
     const [isUpdating, setIsUpdating] = useState(false);
 
     // =================================================================
@@ -52,11 +50,12 @@ export default function Dashboard() {
         const fetchData = async () => {
             try {
                 const response = await fetch(`${API_BASE_URL}/sensors/current`);
+                
                 if (response.ok) {
                     const data = await response.json();
 
                     console.log("Data Mentah dari Laravel:", data);
-
+                    
                     // 1. UPDATE SENSOR (Selalu update)
                     setSensorData({
                         suhuRuangan: parseFloat(data.suhu_ruangan || 0),
@@ -68,10 +67,8 @@ export default function Dashboard() {
                     });
 
                     // 2. UPDATE STATUS ALAT 
-                    // Logika: Hanya update status alat dari DB kalau user TIDAK sedang menekan tombol.
                     if (!isUpdating) {
                         setDeviceStatus({
-                            // PERBAIKAN: Gunakan parseStatus biar akurat
                             status_kipas: parseStatus(data.status_kipas),
                             status_kipas2: parseStatus(data.status_kipas2),
                             status_pompa: parseStatus(data.status_pompa),
@@ -84,11 +81,10 @@ export default function Dashboard() {
             }
         };
 
-        // Fetch pertama kali
         fetchData();
-
-        // Polling tiap 5 menit
-        const interval = setInterval(fetchData, 300000);
+        
+        // Polling tiap 2 detik
+        const interval = setInterval(fetchData, 2000); 
 
         return () => clearInterval(interval);
 
@@ -96,23 +92,18 @@ export default function Dashboard() {
 
 
     // =================================================================
-    // 2. FUNGSI KLIK TOMBOL (FIXED)
+    // 2. FUNGSI KLIK TOMBOL
     // =================================================================
     const handleToggle = async (key, currentValue) => {
-        // 1. KUNCI POLLING (Supaya data lama dari server gak menimpa tombol kita)
         setIsUpdating(true);
-
-        // 2. Tentukan Nilai Baru (Boolean)
         const newValue = !currentValue;
-
-        // 3. OPTIMISTIC UPDATE (Ubah UI duluan biar cepat & gak mantul)
+        
+        // Optimistic Update
         setDeviceStatus((prev) => ({ ...prev, [key]: newValue }));
 
         try {
-            const endpoint = `${API_BASE_URL}/device/status`;
+            const endpoint = `${API_BASE_URL}/device/status`; 
 
-            // 4. KIRIM KE SERVER (Format Angka 1 atau 0)
-            // Database lebih suka angka 1/0 daripada true/false
             const payload = {
                 [key]: newValue ? 1 : 0
             };
@@ -126,17 +117,12 @@ export default function Dashboard() {
                 body: JSON.stringify(payload)
             });
 
-            console.log(`Berhasil update ${key} ke ${newValue ? 1 : 0}`);
-
-            // 5. Buka Kuncian setelah 3 detik
-            // Kita kasih waktu server buat simpan data, baru kita polling lagi
             setTimeout(() => {
                 setIsUpdating(false);
             }, 3000);
 
         } catch (error) {
             console.error("Gagal update status:", error);
-            // Kalau error beneran, baru balikin tombolnya (Rollback)
             setDeviceStatus((prev) => ({ ...prev, [key]: currentValue }));
             setIsUpdating(false);
             alert("Gagal terhubung ke Server!");
@@ -165,7 +151,7 @@ export default function Dashboard() {
 
                 {activeTab === "Dashboard" && (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-
+                        
                         {/* 1. KARTU OTOMATIS */}
                         <AutoModeCard
                             isAuto={deviceStatus.mode_otomatis}
@@ -175,8 +161,6 @@ export default function Dashboard() {
                                     : null
                             }
                         />
-
-                        {/* 2. GRID TOMBOL ALAT */}
                         <DeviceGrid
                             deviceStatus={deviceStatus}
                             handleToggle={
@@ -185,22 +169,14 @@ export default function Dashboard() {
                                     : () => alert("Akses Ditolak: Hanya Admin yang boleh mengontrol alat!")
                             }
                         />
-
-                        {/* 3. GRID SENSOR */}
                         <SensorGrid sensorData={sensorData} />
                     </div>
                 )}
 
                 <div className="mt-6">
-                    {activeTab === "Analisis" && (
-                        <Analisis latestData={sensorData} />
-                    )}
-                    {activeTab === "Laporan" && (
-                        <Laporan latestData={sensorData} />
-                    )}
-                    {activeTab === "ManajemenUser" && userRole === "admin" && (
-                        <ManajemenUser />
-                    )}
+                    {activeTab === "Analisis" && <Analisis latestData={sensorData} />}
+                    {activeTab === "Laporan" && <Laporan latestData={sensorData} />}
+                    {activeTab === "ManajemenUser" && userRole === "admin" && <ManajemenUser />}
                 </div>
             </div>
         </div>
