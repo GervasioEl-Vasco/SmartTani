@@ -2,5 +2,5 @@ import axios from 'axios';
 window.axios = axios;
 
 window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
-window.axios.defaults.baseURL = import.meta.env.VITE_API_BASE_URL || 'https://smarttani.site';
+window.axios.defaults.baseURL = import.meta.env.VITE_API_BASE_URL || 'http://192.168.1.103:8000';
 window.axios.defaults.withCredentials = true; 
