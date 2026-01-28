@@ -19,6 +19,9 @@ class Sensor extends Model
         'suhu_tanah',
         'kelembaban_tanah',
         'ph_air',
-        'kualitas_air'
+        'kualitas_air',
+        'status_pompa',
+        'status_kipas',
+        'status_kipas2'
     ];
 }

@@ -38,6 +38,11 @@ export default function Laporan() {
             }
         };
         fetchData();
+        
+        // Auto-refresh tiap 5 menit untuk update data laporan
+        const interval = setInterval(fetchData, 300000);
+        
+        return () => clearInterval(interval);
     }, [selectedDate]);
 
     // ... (Bagian Statistik) ...

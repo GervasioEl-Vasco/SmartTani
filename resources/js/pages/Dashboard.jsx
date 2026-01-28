@@ -83,8 +83,8 @@ export default function Dashboard() {
 
         fetchData();
         
-        // Polling tiap 2 detik
-        const interval = setInterval(fetchData, 2000); 
+        // Polling tiap 1 menit untuk monitoring berkala
+        const interval = setInterval(fetchData, 60000); 
 
         return () => clearInterval(interval);
 

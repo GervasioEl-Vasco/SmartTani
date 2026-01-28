@@ -26,8 +26,6 @@ Route::middleware('auth:sanctum')->group(function(){
     Route::get('/auth/users', [AuthController::class, 'index']);
     Route::delete('/auth/users/{id}', [AuthController::class, 'destroy']);
     
-    // Admin User Management
-    Route::apiResource('users', UserController::class);
 });
 
 // ========================================================================

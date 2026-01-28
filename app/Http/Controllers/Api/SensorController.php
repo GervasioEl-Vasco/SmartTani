@@ -17,37 +17,45 @@ class SensorController extends Controller
     {
         // Validasi data
         $validated = $request->validate([
-            'suhu_ruangan'       => 'required|numeric',
+            'suhu_ruangan' => 'required|numeric',
             'kelembaban_ruangan' => 'required|numeric',
-            'suhu_tanah'         => 'required|numeric',
-            'kelembaban_tanah'   => 'required|numeric',
-            'ph_air'             => 'required|numeric',
-            'kualitas_air'       => 'nullable|numeric', 
-            
+            'suhu_tanah' => 'required|numeric',
+            'kelembaban_tanah' => 'required|numeric',
+            'ph_air' => 'required|numeric',
+            'kualitas_air' => 'nullable|numeric',
+
             // Status alat (Boleh ada, boleh tidak)
-            'status_pompa'       => 'nullable',
-            'status_kipas'       => 'nullable',
-            'status_kipas2'        => 'nullable',
-            'mode_otomatis'      => 'nullable' 
+            'status_pompa' => 'nullable',
+            'status_kipas' => 'nullable',
+            'status_kipas2' => 'nullable',
+            'mode_otomatis' => 'nullable'
         ]);
 
         Log::info('DATA DARI ESP32:', $request->all());
 
+        // Simpan data sensor BESERTA status device
         $sensor = Sensor::create($request->only([
             'suhu_ruangan',
             'kelembaban_ruangan',
             'suhu_tanah',
             'kelembaban_tanah',
             'ph_air',
-            'kualitas_air'
+            'kualitas_air',
+            'status_pompa',
+            'status_kipas',
+            'status_kipas2'
         ]));
 
 
+        // Update juga DeviceSetting untuk status terkini
         $setting = DeviceSetting::first();
-        if($setting) {
-             $setting->update($request->only([
-                 'status_pompa', 'status_kipas', 'status_kipas2', 'mode_otomatis'
-             ]));
+        if ($setting) {
+            $setting->update($request->only([
+                'status_pompa',
+                'status_kipas',
+                'status_kipas2',
+                'mode_otomatis'
+            ]));
         }
 
         return response()->json([
@@ -79,7 +87,7 @@ class SensorController extends Controller
             'status_kipas' => 0,
             'status_pompa' => 0,
             'status_kipas2' => 0,
-            'mode_otomatis' => 0 
+            'mode_otomatis' => 0
         ];
 
         // Timpa dengan data sensor jika ada
@@ -111,7 +119,7 @@ class SensorController extends Controller
         $data = Sensor::latest()
             ->take(500)
             ->get()
-            ->reverse() 
+            ->reverse()
             ->values();
 
         return response()->json($data);

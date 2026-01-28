@@ -6,10 +6,15 @@ use Illuminate\Foundation\Configuration\Middleware;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
-        web: __DIR__.'/routes/web.php',
-        api: __DIR__.'/routes/api.php',
-        commands: __DIR__.'/routes/console.php',
+        web: dirname(__DIR__) . '/routes/web.php',
+        api: dirname(__DIR__) . '/routes/api.php',
+        commands: dirname(__DIR__) . '/routes/console.php',
         health: '/up',
+        then: function () {
+            Route::get('/{any}', function () {
+                return view('dashboard');
+            })->where('any', '.*');
+        }
     )
     ->withMiddleware(function (Middleware $middleware): void {
         //
