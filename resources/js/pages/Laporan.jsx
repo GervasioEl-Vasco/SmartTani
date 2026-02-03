@@ -76,11 +76,11 @@ export default function Laporan() {
             item.ph_air,
             item.status_pompa ? "ON" : "OFF",
             item.status_kipas ? "ON" : "OFF",
-            item.status_kipas2 ? "BUKA" : "TUTUP"
+            item.status_kipas2 ? "ON" : "OFF",
         ]);
 
         autoTable(doc, {
-            head: [["Waktu", "Suhu", "Hum", "Suhu T", "Hum T", "Kualitas", "pH", "Pompa", "Kipas", "Atap"]],
+            head: [["Waktu", "Suhu", "Hum", "Suhu T", "Hum T", "Kualitas", "pH", "Pompa", "Kipas", "Kipas2"]],
             body: tableRows,
             startY: 28,
             theme: 'grid',
@@ -92,9 +92,9 @@ export default function Laporan() {
 
     // --- EXPORT CSV ---
     const downloadCSV = () => {
-        let csv = 'No,Waktu,Suhu Ruang,Lembab Ruang,Suhu Tanah,Lembab Tanah,Kualitas Air,pH Air,Pompa,Kipas,Atap\n';
+        let csv = 'No,Waktu,Suhu Ruang,Lembab Ruang,Suhu Tanah,Lembab Tanah,Kualitas Air,pH Air,Pompa,Kipas,Kipa2\n';
         dataLaporan.forEach((item, idx) => {
-            csv += `${idx + 1},"${item.tanggal} ${item.waktu}",${item.suhu_ruangan},${item.kelembaban_ruangan},${item.suhu_tanah},${item.kelembaban_tanah},${item.kualitas_air},${item.ph_air},${item.status_pompa ? 'ON' : 'OFF'},${item.status_kipas ? 'ON' : 'OFF'},${item.status_kipas2 ? 'BUKA' : 'TUTUP'}\n`;
+            csv += `${idx + 1},"${item.tanggal} ${item.waktu}",${item.suhu_ruangan},${item.kelembaban_ruangan},${item.suhu_tanah},${item.kelembaban_tanah},${item.kualitas_air},${item.ph_air},${item.status_pompa ? 'ON' : 'OFF'},${item.status_kipas ? 'ON' : 'OFF'},${item.status_kipas2 ? 'ON' : 'OFF'}\n`;
         });
         
         const link = document.createElement('a');

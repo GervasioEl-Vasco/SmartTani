@@ -51,11 +51,11 @@ export default function ReportTable({ data, loading }) {
                 <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${item.status_pompa ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-400'}`}>
                   P
                 </span>
-                <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${item.status_kipas ? 'bg-orange-100 text-orange-700' : 'bg-gray-100 text-gray-400'}`}>
+                <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${item.status_kipas ? 'bg-green-100 text-orange-700' : 'bg-gray-100 text-gray-400'}`}>
                   K
                 </span>
                 <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${item.status_kipas2 ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-400'}`}>
-                  A
+                  K2
                 </span>
               </td>
             </tr>
